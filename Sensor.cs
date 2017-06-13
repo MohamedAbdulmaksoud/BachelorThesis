@@ -1,10 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System;
-using System.Threading;
 
 
 public class Sensor : MonoBehaviour
@@ -14,10 +8,7 @@ public class Sensor : MonoBehaviour
     public int ID;
     // The state of the sensor; 1=Object 0=None
     public bool state;
-    //flag to terminate thread upon exit from game
-    
-
-
+   
     private void Awake()
     {
         state = false;
