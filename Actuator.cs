@@ -1,8 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Actuator : MonoBehaviour
 {
@@ -10,20 +6,12 @@ public class Actuator : MonoBehaviour
     public int ID;
 	//state representing the current output of the actuator.
 	private bool state;
-
 	void Start ()
 	{        
 	}
-
 	void Update ()
 	{
 	}
-
-	
-
-   
-
-   
 	public void setState(bool state){
 		this.state = state;
 	}
