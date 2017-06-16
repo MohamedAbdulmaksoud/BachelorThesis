@@ -24,8 +24,7 @@ public class TCPOneServer : MonoBehaviour
     // data to be sent. A single byte for each boolean value.
     byte[] sdata;
     //flag to terminate connection upon Unity exit.
-    bool alive;
-
+    bool alive;   
     private void Awake()
     {
         alive = true;
@@ -39,8 +38,8 @@ public class TCPOneServer : MonoBehaviour
         actuators = GameObject.FindGameObjectsWithTag("Actuator").OrderBy(Actuator => Actuator.GetComponent<Actuator>().ID).ToArray();
         sensors = GameObject.FindGameObjectsWithTag("Sensor").OrderBy(sensor => sensor.GetComponent<Sensor>().ID).ToArray();
         // Sets length of data to be received to be exactly equal to number of Actuators 
-        data = new byte[actuators.Length];
-        sdata = new byte[sensors.Length];
+        data = new byte[256];
+        sdata = new byte[256];
         // Start listening for client requests
         server.Start();
         Thread connect = new Thread(Read);
@@ -51,24 +50,39 @@ public class TCPOneServer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+
         if (data != null)
-        {   //Sets actuators' states based on data received from Client
-            for (int i = 0; i < data.Length; i++)
+        {
+            // Update Actuators' states
+            for (int i = 0; i < actuators.Length; i++)
             {
-                actuators[i].GetComponent<Actuator>().setState(ToBoolean(data, i));
+                actuators[i].GetComponent<Actuator>().setState(ToBoolean(data, actuators[i].GetComponent<Actuator>().ID));
+
             }
+
             //Updates sensors' states to be ready for sending
             foreach (GameObject sensor in sensors)
             {
-                sdata[sensor.GetComponent<Sensor>().ID] = To4DIACBoolean(sensor.GetComponent<Sensor>().getState());
+                //sdata[sensor.GetComponent<Sensor>().ID] = To4DIACBoolean(sensor.GetComponent<Sensor>().getState());
+                sdata[sensor.GetComponent<Sensor>().ID] = Convert.ToByte(sensor.GetComponent<Sensor>().getState());
             }
 
-            /*foreach (GameObject actuator in actuators)
+            //This approach is for checking on receiving data whether IDs given to the actuators differs from those given in 4DIAC.
+            //It works by sending an array of bytes where default value is 2 since 0/1 equals false/true respectively.
+            //It searches every Actuator ID and checks corresponding in data received index in array.
+            /*for (int i = 0; i < actuators.Length; i++)
             {
-                Debug.Log(actuator.name + " : " + actuator.GetComponent<Actuator>().getState().ToString());
+                if (data[actuators[i].GetComponent<Actuator>().ID] == 2)
+                {
+                    Debug.Log("The Actuator:" + " " + actuators[i].name + " has a different ID than parameter given in 4DIAC");
+                }
+                else
+                {
+                    actuators[i].GetComponent<Actuator>().setState(ToBoolean(data, actuators[i].GetComponent<Actuator>().ID));
+                }
             }*/
         }
-
     }
     void Read()
     {
@@ -109,7 +123,6 @@ public class TCPOneServer : MonoBehaviour
         // Read actuator data from the client. 
         stream.ReadTimeout = 100;
         stream.EndRead(ar);
-        Debug.Log(System.Text.Encoding.ASCII.GetString(data));
         stream.WriteTimeout = 1000;
         // Send sensor data to the stream.
         if (stream.CanWrite)
@@ -141,11 +154,12 @@ public class TCPOneServer : MonoBehaviour
         else
             return 0x40;
     }
-
+   
     void OnApplicationQuit()
     {
-        alive = false;
+        
+        alive = false;       
         server.Stop();
     }
-
+   
 }
