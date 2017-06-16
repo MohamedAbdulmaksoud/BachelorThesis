@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
 using System.Linq;
+using System.IO;
 
 //for more info: https://docs.microsoft.com/en-us/dotnet/framework/network-programming/asynchronous-server-socket-example
 
@@ -71,38 +72,59 @@ public class TCPOneServer : MonoBehaviour
     void Read()
     {
 
-        // Set the event to nonsignaled state.
-        allDone.Reset();
-        Debug.Log("Waiting for actuator data... ");
-        // Start an asynchronous socket to listen for connections.  
-        server.BeginAcceptTcpClient(new AsyncCallback(AcceptCallback), server);
-        // Wait until a connection is made before continuing.  
-        allDone.WaitOne();
+        if (alive)
+        {
+            Thread.Sleep(200);
+            // Set the event to nonsignaled state.
+            allDone.Reset();
+            Debug.Log("Waiting for Client connection... ");
+            // Start an asynchronous socket to listen for connections.  
+            server.BeginAcceptTcpClient(new AsyncCallback(AcceptCallback), server);
+            // Wait until a connection is made before continuing.  
+            allDone.WaitOne(); 
+        }
 
     }
 
     private void AcceptCallback(IAsyncResult ar)
     {
+       
         // Signal the main thread to continue.  
         allDone.Set();
         // Get the server that handles the client request.  
         TcpListener server = (TcpListener)ar.AsyncState;
         TcpClient client = server.EndAcceptTcpClient(ar);
+        Debug.Log("Client Connected! :)");
         NetworkStream stream = client.GetStream();
         stream.BeginRead(data, 0, data.Length, new AsyncCallback(ReadCallback), stream);
     }
 
     private void ReadCallback(IAsyncResult ar)
     {
-        Thread.Sleep(2000);
+        Thread.Sleep(200);
         // Retrieve the server's networkstream
         NetworkStream stream = (NetworkStream)ar.AsyncState;
         // Read actuator data from the client. 
+        stream.ReadTimeout = 100;
         stream.EndRead(ar);
         Debug.Log(System.Text.Encoding.ASCII.GetString(data));
+        stream.ReadTimeout = 1000;
         // Send sensor data to the stream.
         if (stream.CanWrite)
-            stream.Write(sdata, 0, sdata.Length);
+        {
+            try
+            {
+                stream.Write(sdata, 0, sdata.Length);
+
+            }
+            catch(IOException e)
+            {
+                stream.Close();
+                Debug.Log("Client has disconnected ... :(");
+                Read();
+            }
+        }
+          
         //Loop again as long as Unity is active
         if (alive)
             stream.BeginRead(data, 0, data.Length, new AsyncCallback(ReadCallback), stream);
