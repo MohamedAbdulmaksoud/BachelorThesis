@@ -11,7 +11,7 @@ using System.IO;
 public class TCPOneServer : MonoBehaviour
 {
     public static ManualResetEvent allDone = new ManualResetEvent(false);
-    //public string _IPAddress;
+    //public string _IPAddress; to be used with Unity UI
     private static IPAddress ip;
     // set the TcpListener on port 13000
     const int port = 13000;
@@ -52,11 +52,12 @@ public class TCPOneServer : MonoBehaviour
     void Update()
     {
         if (data != null)
-        {
+        {   //Sets actuators' states based on data received from Client
             for (int i = 0; i < data.Length; i++)
             {
                 actuators[i].GetComponent<Actuator>().setState(ToBoolean(data, i));
             }
+            //Updates sensors' states to be ready for sending
             foreach (GameObject sensor in sensors)
             {
                 sdata[sensor.GetComponent<Sensor>().ID] = To4DIACBoolean(sensor.GetComponent<Sensor>().getState());
@@ -71,7 +72,7 @@ public class TCPOneServer : MonoBehaviour
     }
     void Read()
     {
-
+        //check whether Unity is still active
         if (alive)
         {
             Thread.Sleep(200);
@@ -96,6 +97,7 @@ public class TCPOneServer : MonoBehaviour
         TcpClient client = server.EndAcceptTcpClient(ar);
         Debug.Log("Client Connected! :)");
         NetworkStream stream = client.GetStream();
+        //Begins an asynchronous read. 
         stream.BeginRead(data, 0, data.Length, new AsyncCallback(ReadCallback), stream);
     }
 
@@ -108,7 +110,7 @@ public class TCPOneServer : MonoBehaviour
         stream.ReadTimeout = 100;
         stream.EndRead(ar);
         Debug.Log(System.Text.Encoding.ASCII.GetString(data));
-        stream.ReadTimeout = 1000;
+        stream.WriteTimeout = 1000;
         // Send sensor data to the stream.
         if (stream.CanWrite)
         {
