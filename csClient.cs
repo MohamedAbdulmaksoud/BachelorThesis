@@ -22,7 +22,7 @@ namespace Client
                 // Note, for this client to work you need to have a TcpServer 
                 // connected to the same address as specified by the server, port
                 // combination.
-                Int32 port = 13000;
+                Int32 port = 61499;
                 TcpClient client = new TcpClient("localhost", port);
                 // Translate the passed message into ASCII and store it as a Byte array.
                 byte[] data = new byte[256];
@@ -54,7 +54,7 @@ namespace Client
                     // Read the first batch of the TcpServer response bytes.
                     Int32 bytes = stream.Read(data, 0, data.Length);
                     responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
-                    Console.WriteLine("Received: {0}", responseData);
+                    Console.WriteLine("Received: {0}", data.ToString());
 
                     /*// Close everything.
                     stream.Close();
