@@ -68,7 +68,7 @@ public class AController : MonoBehaviour
         while (alive)
         {
             data = reciever.Receive(ref remoteep);
-            Thread.Sleep(1000);
+            Thread.Sleep(200);
         }
     }
     //Terminating the UDP connection upon exit from game.
