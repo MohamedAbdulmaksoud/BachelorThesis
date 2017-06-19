@@ -44,8 +44,6 @@ public class SController : MonoBehaviour {
                 sdata[sensor.GetComponent<Sensor>().ID] = To4DIACBoolean(sensor.GetComponent<Sensor>().getState());
             }
 
-            //Debug.Log(System.Text.Encoding.Default.GetString(sdata));
-
             sender.Send(sdata, sdata.Length, remoteep);
             Thread.Sleep(30);
         
