@@ -50,8 +50,7 @@ public class AConnection : MonoBehaviour
 		
 		while (alive) {
 			byte[] data = rec.Receive (ref remoteep);
-			state = ToBoolean (data);
-			Debug.Log (state.ToString ()); // Unessential command. Used for tracing purpose.
+			state = ToBoolean (data);			
 			Thread.Sleep (30);
 		}
 
